@@ -9,8 +9,13 @@ async function run() {
   });
 
   const page = await browser.newPage();
-  await page.goto("https://app.helpwise.io/", { timeout: 120000 });
-
+  await page.goto("https://app.helpwise.io/", {
+    timeout: 120000,
+    waitUntil: "networkidle2",
+  });
+  await page.waitForSelector("#google-connected-email");
+  await page.click("#google-connected-email");
+  await page.waitForNavigation({ waitUntil: "networkidle0" });
   //   check cookie is set or not
   const cookiesFilePath = "cookies.json";
   const previousSession = fs.existsSync(cookiesFilePath);
