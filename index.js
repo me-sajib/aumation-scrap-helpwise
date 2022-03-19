@@ -14,22 +14,15 @@ async function run() {
     waitUntil: "networkidle2",
   });
 
-  async function login(done) {
-    await page.waitForNavigation({ waitUntil: "load", timeout: 120000 });
-    const heading = await page.$eval("h3", (heading) => heading.innerText);
-    expect(heading).to.eql("Email");
-    if (heading !== "Email") {
-      await page.waitForSelector(".form-group", { timeout: 120000 });
-      await page.type("#email", "me.mrsajib@gmail.com");
-      await page.type("#password", "sajib$S");
-      await Promise.all([
-        page.click(".btn-brand-02"),
-        page.waitForNavigation({ waitUntil: "networkidle0" }),
-      ]);
-    }
-    done();
+  if (page.url() !== "https://app.helpwise.io/welcome") {
+    await page.waitForSelector(".form-group", { timeout: 120000 });
+    await page.type("#email", "me.mrsajib@gmail.com");
+    await page.type("#password", "sajib$S");
+    await Promise.all([
+      page.click(".btn-brand-02"),
+      page.waitForNavigation({ waitUntil: "networkidle0" }),
+    ]);
   }
-  login();
 
   await page.screenshot({ path: "helpWise.png" });
   await browser.close();
