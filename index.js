@@ -13,9 +13,8 @@ async function run() {
     timeout: 120000,
     waitUntil: "networkidle2",
   });
-  await page.waitForSelector("#google-connected-email");
-  await page.click("#google-connected-email");
-  await page.waitForNavigation({ waitUntil: "networkidle0" });
+
+  // await page.waitForNavigation({ waitUntil: "networkidle0" });
   //   check cookie is set or not
   const cookiesFilePath = "cookies.json";
   const previousSession = fs.existsSync(cookiesFilePath);
@@ -35,6 +34,14 @@ async function run() {
   const cookiesObject = await page.cookies();
   // Write cookies to temp file to be used in other profile pages
   if (!previousSession) {
+    await page.waitForSelector(".form-group");
+    await page.type("#email", "me.mrsajib@gmail.com");
+    await page.type("#password", "sajib$S");
+    await Promise.all([
+      page.click(".btn-brand-02"),
+      page.waitForNavigation({ waitUntil: "networkidle0", timeout: 120000 }),
+    ]);
+
     fs.writeFile(
       cookiesFilePath,
       JSON.stringify(cookiesObject),
