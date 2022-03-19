@@ -14,45 +14,22 @@ async function run() {
     waitUntil: "networkidle2",
   });
 
-  // await page.waitForNavigation({ waitUntil: "networkidle0" });
-  //   check cookie is set or not
-  const cookiesFilePath = "cookies.json";
-  const previousSession = fs.existsSync(cookiesFilePath);
-  if (previousSession) {
-    // If file exist load the cookies
-    const cookiesString = fs.readFileSync(cookiesFilePath);
-    const parsedCookies = JSON.parse(cookiesString);
-    if (parsedCookies.length !== 0) {
-      for (let cookie of parsedCookies) {
-        await page.setCookie(cookie);
-      }
-      console.log("Session has been loaded in the browser");
+  async function login(done) {
+    await page.waitForNavigation({ waitUntil: "load", timeout: 120000 });
+    const heading = await page.$eval("h3", (heading) => heading.innerText);
+    expect(heading).to.eql("Email");
+    if (heading !== "Email") {
+      await page.waitForSelector(".form-group", { timeout: 120000 });
+      await page.type("#email", "me.mrsajib@gmail.com");
+      await page.type("#password", "sajib$S");
+      await Promise.all([
+        page.click(".btn-brand-02"),
+        page.waitForNavigation({ waitUntil: "networkidle0" }),
+      ]);
     }
+    done();
   }
-
-  // Save Session Cookies
-  const cookiesObject = await page.cookies();
-  // Write cookies to temp file to be used in other profile pages
-  if (!previousSession) {
-    await page.waitForSelector(".form-group");
-    await page.type("#email", "me.mrsajib@gmail.com");
-    await page.type("#password", "sajib$S");
-    await Promise.all([
-      page.click(".btn-brand-02"),
-      page.waitForNavigation({ waitUntil: "networkidle0", timeout: 120000 }),
-    ]);
-
-    fs.writeFile(
-      cookiesFilePath,
-      JSON.stringify(cookiesObject),
-      function (err) {
-        if (err) {
-          console.log("The file could not be written.", err);
-        }
-        console.log("Session has been successfully saved");
-      }
-    );
-  }
+  login();
 
   await page.screenshot({ path: "helpWise.png" });
   await browser.close();
